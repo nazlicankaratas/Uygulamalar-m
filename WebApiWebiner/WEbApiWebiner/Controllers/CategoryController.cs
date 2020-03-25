@@ -11,26 +11,34 @@ namespace WEbApiWebiner.Controllers
 {
     public class CategoryController : ApiController
     {
-        NorthwindEntities db = new NorthwindEntities();
-
-        public List<CategoryModel> GetAllCategories()
+    //Dependency Injection yapılmalı
+        private NorthwindEntities _db = new NorthwindEntities();
+        
+        public IActionResult GetAllCategories()
         {
-            List<CategoryModel> catList = db.Categories.Select(x => new CategoryModel()
+            var catList = _db.Categories.Select(x => new CategoryModel
             {
-                KategoriAdi=x.CategoryName,
-                Aciklamasi=x.Description
+                KategoriAdi = x.CategoryName,
+                Aciklamasi = x.Description
             }).ToList();
-            return catList;
+            
+            //Api projelerinde Status code önemli o yüzden böyle dönmelisin.
+            return Ok(catList);
         }
         [HttpGet]
-        public CategoryModel CategoryByID(int id)
+        public IActionResult CategoryById(int id)
         {
-            Categories cat = db.Categories.Find(id);
-            CategoryModel catModel = new CategoryModel();
-            catModel.Aciklamasi = cat.Description;
-            catModel.KategoriAdi = cat.CategoryName;
+            var cat = _db.Categories.Find(id);
+            if(cat is null)
+                return NotFound(id);
+                
+            var catModel = new CategoryModel
+            {
+                Aciklamasi = cat.Description;
+                KategoriAdi = cat.CategoryName;
+            };
 
-            return catModel;
+            return Ok(catModel);
         }
     }
 }
